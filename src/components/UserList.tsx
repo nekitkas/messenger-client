@@ -1,6 +1,7 @@
 import ListItem from "@mui/material/ListItem";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
+import { styled } from '@mui/material/styles';
 import ListItemButton from '@mui/material/ListItemButton';
 import Avatar from "@mui/material/Avatar";
 import React from "react";
@@ -9,20 +10,50 @@ import React from "react";
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import Box from "@mui/material/Box";
 import { useQuery } from '@tanstack/react-query';
+import {Dialog, DialogContent} from "@mui/material";
+import Typography from "@mui/material/Typography";
 
 interface User {
     id: number;
     username: string;
 }
 
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+    '& .MuiDialogContent-root': {
+        padding: theme.spacing(2),
+    },
+    '& .MuiDialogActions-root': {
+        padding: theme.spacing(1),
+    },
+}));
+
 const url = 'http://localhost:3000/users'
 
 const renderRow = (props: ListChildComponentProps<User[]>) => {
+    const [open, setOpen] = React.useState(false);
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    }
+
+    const handleClose = () => {
+        setOpen(false);
+    }
+
     const { style, index, data } = props;
     const user: User = data ? data[index] : { username: "Loading..." };
     return (
         <ListItem style={style} key={index} component="div" disablePadding>
-            <ListItemButton>
+            <BootstrapDialog
+                onClose={handleClose}
+                open={open}
+            ><DialogContent>
+                    <Typography>
+                        {user.username}
+                    </Typography>
+                </DialogContent>
+            </BootstrapDialog>
+            <ListItemButton onClick={handleClickOpen}>
                 <ListItemText primary={user.username} />
                 <ListItemAvatar>
                     <Avatar

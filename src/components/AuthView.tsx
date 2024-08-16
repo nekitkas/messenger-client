@@ -1,12 +1,21 @@
 import { UserList } from './UserList'
 import React from "react";
-import {useUser} from "../context/User.context.tsx";
+import {useUser} from "../context/User.context";
+import {Chat} from "./chat/Chat";
+import Stack from '@mui/material/Stack';
 
 export const AuthView: React.FC = () => {
     const user = useUser();
-    console.log("user here", user.username)
     if (!user) return <div>Loading...</div>
     return (
-        <UserList />
+        <Stack
+            direction="row"
+            justifyContent="center"
+            alignItems="center"
+            spacing={2}
+        >
+            <UserList />
+            <Chat />
+        </Stack>
     );
 }

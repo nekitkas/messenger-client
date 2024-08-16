@@ -20,7 +20,6 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         return <div>Loading...</div>;
     }
 
-    console.log("user", user)
     return (
         <UserContext.Provider value={user}>
             {children}
