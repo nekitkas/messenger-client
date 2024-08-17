@@ -1,72 +1,69 @@
-import TextField from '@mui/material/TextField';
-import React, { useContext, useState } from 'react';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import SendIcon from '@mui/icons-material/Send';
-import Message from './Message.tsx';
-import { ChatMessage, MESSAGE_TYPE } from '../../context/ChatMessage.ts';
+import React, { useEffect, useState } from 'react';
 import Container from '@mui/material/Container';
-import { WebsocketContext } from '../../context/Websocket.context.tsx';
+import Stack from '@mui/material/Stack';
 import useWebSocket from 'react-use-websocket';
 import { useUser } from '../../context/User.context.tsx';
-// import {useMutation, useQuery} from "@tanstack/react-query";
-// import { messageQueryKey, useChatMessagesContext } from "../../context/ChatMessageProvider";
+import { ChatMessage, MESSAGE_TYPE } from '../../context/ChatMessage.ts';
+import MessageList from './MessageList';
+import MessageInput from './MessageInput';
 
-const wsUrl = 'ws://localhost:3000/ws';
+const url = 'ws://localhost:3000/ws';
+
+interface Messages {
+    id: number;
+    text: string;
+    sender: string;
+    avatarUrl: string;
+    own: boolean;
+}
+
+const isChatMessage = (message: any): message is ChatMessage => {
+    return (
+        typeof message === 'object' &&
+        message !== null &&
+        'type' in message &&
+        'content' in message &&
+        'from' in message &&
+        'roomId' in message &&
+        message.type === MESSAGE_TYPE.Message
+    );
+};
 
 export const Chat: React.FC = () => {
-    const messages = [
-        {
-            id: 1,
-            text: 'Hello!',
-            sender: 'Alice',
-            avatarUrl: 'https://example.com/alice.jpg',
-            own: false,
-        },
-        {
-            id: 2,
-            text: 'Hi Alice, how are you?',
-            sender: 'Bob',
-            avatarUrl: 'https://example.com/bob.jpg',
-            own: true,
-        },
-        {
-            id: 3,
-            text: 'I’m doing well, thanks!',
-            sender: 'Alice',
-            avatarUrl: 'https://example.com/alice.jpg',
-            own: false,
-        },
-    ];
-
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [message, setMessage] = useState('');
+    const [messages, setMessages] = useState<Messages[]>([]);
     const user = useUser();
-    console.log('user', user?.id);
-    const { conn, setConn } = useContext(WebsocketContext);
-    console.log('conn', conn);
-    const userID = user.id.toString();
-    const { sendJsonMessage, getWebSocket } = useWebSocket(
-        wsUrl + `?userId=${userID}`
-    );
-    setConn(getWebSocket() as WebSocket);
-    console.log('websocket set to ', conn);
+    if (!user) {
+        return <div>user null </div>;
+    }
 
-    const onSubmit = () => {
-        sendJsonMessage({
+    const userID = user.id.toString();
+    const { sendJsonMessage, lastJsonMessage } = useWebSocket(
+        url + `?userId=${userID}`
+    );
+
+    useEffect(() => {
+        if (lastJsonMessage && isChatMessage(lastJsonMessage)) {
+            setMessages((prev) => [
+                ...prev,
+                {
+                    id: prev.length + 1,
+                    text: lastJsonMessage.content,
+                    sender: lastJsonMessage.from,
+                    avatarUrl: `https://api.dicebear.com/9.x/pixel-art/svg?seed=${user.username}`,
+                    own: lastJsonMessage.from === user.username,
+                },
+            ]);
+        }
+    }, [lastJsonMessage, user.username]);
+
+    const handleSendMessage = (message: string) => {
+        const formated: ChatMessage = {
             type: MESSAGE_TYPE.Message,
             content: message,
-            from: userID,
+            from: user.username,
             roomId: 'lobby',
-        });
-        messages.push({
-            id: messages.length + 1,
-            text: message,
-            sender: user.username,
-            avatarUrl: 'https://example.com/you.jpg',
-            own: true,
-        });
-        setMessage('');
+        };
+        sendJsonMessage(formated);
     };
 
     return (
@@ -76,37 +73,8 @@ export const Chat: React.FC = () => {
                 justifyContent="center"
                 alignItems="center"
             >
-                <Container>
-                    {messages?.map((msg) => (
-                        <Message
-                            key={msg.id}
-                            message={msg.text}
-                            sender={msg.sender}
-                            avatarUrl={msg.avatarUrl}
-                            isOwnMessage={msg.own}
-                        />
-                    ))}
-                </Container>
-                <Stack
-                    direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                    spacing={2}
-                >
-                    <TextField
-                        fullWidth
-                        label="Text"
-                        value={message}
-                        onChange={(event) => setMessage(event.target.value)}
-                    />
-                    <Button
-                        onClick={onSubmit}
-                        variant="contained"
-                        endIcon={<SendIcon />}
-                    >
-                        Send
-                    </Button>
-                </Stack>
+                <MessageList messages={messages} />
+                <MessageInput onSubmit={handleSendMessage} />
             </Stack>
         </Container>
     );

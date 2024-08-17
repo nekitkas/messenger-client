@@ -1,13 +1,9 @@
-import { UserList } from './UserList'
-import React from "react";
-import {useUser} from "../context/User.context";
-import {Chat} from "./chat/Chat";
+import { UserList } from './UserList';
+import React from 'react';
+import { Chat } from './chat/Chat';
 import Stack from '@mui/material/Stack';
 
 export const AuthView: React.FC = () => {
-    const user = useUser();
-    console.log('user', user)
-
     return (
         <Stack
             direction="row"
@@ -19,4 +15,4 @@ export const AuthView: React.FC = () => {
             <Chat />
         </Stack>
     );
-}
+};

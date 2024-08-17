@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useGetUser } from "../hooks/useGetUser";
+import { useGetUser } from '../hooks/useGetUser';
 
 type UserProviderProps = {
     children: ReactNode;
@@ -9,7 +9,7 @@ type UserData = {
     id: number;
     username: string;
     email: string;
-}
+};
 
 const UserContext = createContext<UserData | undefined>(undefined);
 
@@ -20,17 +20,14 @@ const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         return <div>Loading...</div>;
     }
 
-    return (
-        <UserContext.Provider value={user}>
-            {children}
-        </UserContext.Provider>
-    );
+    return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 };
 
-const useUser = (): UserData => {
+const useUser = (): UserData | undefined => {
     const context = useContext(UserContext);
     if (context === undefined) {
-        throw new Error("useUser must be used within a UserProvider");
+        console.log('useUser must be used within a UserProvider');
+        return undefined;
     }
 
     return context;
