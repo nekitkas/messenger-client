@@ -4,7 +4,7 @@ import {useUser} from "./context/User.context.tsx";
 
 function App() {
     const user = useUser();
-    console.log("user", user)
+
     return (
         <div>
             {user ? <AuthView /> : <SignIn />}

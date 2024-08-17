@@ -6,7 +6,8 @@ import Stack from '@mui/material/Stack';
 
 export const AuthView: React.FC = () => {
     const user = useUser();
-    if (!user) return <div>Loading...</div>
+    console.log('user', user)
+
     return (
         <Stack
             direction="row"

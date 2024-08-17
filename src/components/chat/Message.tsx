@@ -8,7 +8,7 @@ interface ChatMessageProps {
     isOwnMessage: boolean
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, avatarUrl, isOwnMessage }) => {
+const Message: React.FC<ChatMessageProps> = ({ message, sender, avatarUrl, isOwnMessage }) => {
     return (
         <Box
             display="flex"
@@ -39,4 +39,4 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, sender, avatarUrl, i
     );
 };
 
-export default ChatMessage;
+export default Message;
