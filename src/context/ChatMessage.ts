@@ -1,35 +1,29 @@
-/*import {useContext} from "react";
-import {ChatMessagesContext, ChatMessagesContextType} from "./ChatMessageProvider.tsx";*/
-
-export enum MESSAGE_TYPE {
-    Join = 'join',
-    Leave = 'leave',
-    Message = 'message',
-    Error = 'error',
-    AddRoom = 'add-room',
-    RemoveRoom = 'remove-room',
+export enum WebSocketEventType {
+    JOIN_ROOM = 'join-room',
+    LEAVE_ROOM = 'leave-room',
+    NEW_MESSAGE = 'new-message',
 }
 
-export type ChatMessage = {
-    type: MESSAGE_TYPE.Message;
+export type JoinRoomMessage = {
+    type: WebSocketEventType.JOIN_ROOM;
+    roomId: string;
+    userId: string;
+};
+
+export type LeaveRoomMessage = {
+    type: WebSocketEventType.LEAVE_ROOM;
+    roomId: string;
+    userId: string;
+};
+
+export type NewChatMessage = {
+    type: WebSocketEventType.NEW_MESSAGE;
     content: string;
-    from: string;
+    senderId: string;
     roomId: string;
 };
 
-export type AddRoomMessage = {
-    type: MESSAGE_TYPE.AddRoom;
-    roomId: string;
-    roomName: string;
-};
-
-/*
-export const useChatMessagesContext = (): ChatMessagesContextType => {
-    const context = useContext(ChatMessagesContext);
-
-    if (context === undefined) {
-        throw new Error("useChatMessagesContext must be used within a ChatMessagesProvider");
-    }
-
-    return context;
-};*/
+export type WebSocketEvent =
+    | JoinRoomMessage
+    | LeaveRoomMessage
+    | NewChatMessage;

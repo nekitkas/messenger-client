@@ -5,10 +5,11 @@ type UserProviderProps = {
     children: ReactNode;
 };
 
-type UserData = {
-    id: number;
+export type UserData = {
+    id: string;
     username: string;
     email: string;
+    avatarUrl: string;
 };
 
 const UserContext = createContext<UserData | undefined>(undefined);

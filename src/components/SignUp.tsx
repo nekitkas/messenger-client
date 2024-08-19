@@ -23,24 +23,22 @@ interface SignUpRequest {
 
 export default function SignUp() {
     const queryClient = useQueryClient();
-    const { mutate, isPending, isError, error, data } = useMutation({
-        mutationFn: (data: SignUpRequest) => fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-            credentials: 'include',
-        }).then((res) => res.json()),
+    const { mutate, isPending, isError, error } = useMutation({
+        mutationFn: (data: SignUpRequest) =>
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+                credentials: 'include',
+            }).then((res) => res.json()),
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: ['users']
-            })
+                queryKey: ['users'],
+            });
         },
     });
-
-    console.log(isPending, isError, error, data)
-
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -50,11 +48,10 @@ export default function SignUp() {
             name: formData.get('username') as string,
             email: formData.get('email') as string,
             password: formData.get('password') as string,
-        }
+        };
 
         mutate(signUpData);
     };
-
 
     return (
         <ThemeProvider theme={defaultTheme}>
@@ -74,7 +71,12 @@ export default function SignUp() {
                     <Typography component="h1" variant="h5">
                         Sign up
                     </Typography>
-                    <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+                    <Box
+                        component="form"
+                        noValidate
+                        onSubmit={handleSubmit}
+                        sx={{ mt: 3 }}
+                    >
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
                                 <TextField
@@ -108,7 +110,6 @@ export default function SignUp() {
                                     autoComplete="new-password"
                                 />
                             </Grid>
-
                         </Grid>
                         <Button
                             type="submit"
@@ -120,7 +121,9 @@ export default function SignUp() {
                         </Button>
                         <Box>
                             {error && <p>{error.message}</p>}
-                            {isError && <p>Something went wrong. Please try again.</p>}
+                            {isError && (
+                                <p>Something went wrong. Please try again.</p>
+                            )}
                             {isPending && <p>Signing up...</p>}
                         </Box>
                         <Grid container justifyContent="flex-end">

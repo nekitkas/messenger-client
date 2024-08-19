@@ -1,11 +1,11 @@
-import SignIn from './components/SignIn.tsx';
 import { AuthView } from './components/AuthView.tsx';
 import { useUser } from './context/User.context.tsx';
+import { Combo } from './components/chat/Combo.tsx';
 
 function App() {
     const user = useUser();
-
-    return <div>{user ? <AuthView /> : <SignIn />}</div>;
+    console.log('user', user);
+    return <div>{user ? <AuthView /> : <Combo />}</div>;
 }
 
 export default App;

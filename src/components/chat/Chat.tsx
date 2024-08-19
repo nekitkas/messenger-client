@@ -1,69 +1,40 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
-import useWebSocket from 'react-use-websocket';
+// import useWebSocket from 'react-use-websocket';
 import { useUser } from '../../context/User.context.tsx';
-import { ChatMessage, MESSAGE_TYPE } from '../../context/ChatMessage.ts';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
-
-const url = 'ws://localhost:3000/ws';
-
-interface Messages {
-    id: number;
-    text: string;
-    sender: string;
-    avatarUrl: string;
-    own: boolean;
-}
-
-const isChatMessage = (message: any): message is ChatMessage => {
-    return (
-        typeof message === 'object' &&
-        message !== null &&
-        'type' in message &&
-        'content' in message &&
-        'from' in message &&
-        'roomId' in message &&
-        message.type === MESSAGE_TYPE.Message
-    );
-};
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 export const Chat: React.FC = () => {
-    const [messages, setMessages] = useState<Messages[]>([]);
     const user = useUser();
-    if (!user) {
-        return <div>user null </div>;
-    }
 
-    const userID = user.id.toString();
-    const { sendJsonMessage, lastJsonMessage } = useWebSocket(
-        url + `?userId=${userID}`
-    );
+    const { data } = useQuery({
+        queryKey: ['messages'],
+        queryFn: () =>
+            fetch(
+                'http://localhost:3000/messages/323640d4-a1bb-4ff9-9792-2413fdc0d54b'
+            ).then((res) => res.json()),
+    });
 
-    useEffect(() => {
-        if (lastJsonMessage && isChatMessage(lastJsonMessage)) {
-            setMessages((prev) => [
-                ...prev,
-                {
-                    id: prev.length + 1,
-                    text: lastJsonMessage.content,
-                    sender: lastJsonMessage.from,
-                    avatarUrl: `https://api.dicebear.com/9.x/pixel-art/svg?seed=${user.username}`,
-                    own: lastJsonMessage.from === user.username,
+    const { mutate } = useMutation({
+        mutationFn: (message) =>
+            fetch('http://localhost:3000/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
                 },
-            ]);
-        }
-    }, [lastJsonMessage, user.username]);
+                body: JSON.stringify({
+                    content: message,
+                    userId: user!.id,
+                    chatId: '323640d4-a1bb-4ff9-9792-2413fdc0d54b',
+                }),
+            }).then((res) => res.json()),
+    });
 
     const handleSendMessage = (message: string) => {
-        const formated: ChatMessage = {
-            type: MESSAGE_TYPE.Message,
-            content: message,
-            from: user.username,
-            roomId: 'lobby',
-        };
-        sendJsonMessage(formated);
+        mutate(message);
     };
 
     return (
@@ -73,7 +44,7 @@ export const Chat: React.FC = () => {
                 justifyContent="center"
                 alignItems="center"
             >
-                <MessageList messages={messages} />
+                <MessageList messages={data} />
                 <MessageInput onSubmit={handleSendMessage} />
             </Stack>
         </Container>
